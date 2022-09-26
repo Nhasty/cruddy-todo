@@ -18,8 +18,10 @@ const zeroPaddedNumber = (num) => {
 const readCounter = (callback) => {
   fs.readFile(exports.counterFile, (err, fileData) => {
     if (err) {
+      console.log('err see line 21 counter.js');
       callback(null, 0);
     } else {
+      console.log(fileData);
       callback(null, Number(fileData));
     }
   });
@@ -37,13 +39,45 @@ const writeCounter = (count, callback) => {
 };
 
 // Public API - Fix this function //////////////////////////////////////////////
-
-exports.getNextUniqueId = () => {
-  counter = counter + 1;
-  return zeroPaddedNumber(counter);
+                         /* (error, id) */
+exports.getNextUniqueId = (setIDCallBack) => {
+  // counter = counter + 1;
+  // read count use efcb to return a Number(filedata)
+  readCounter((err, int) => {
+    console.log(err + '    ' + int);
+    if (err) {
+      setIDCallBack(err);
+      console.log(err);
+    } else {
+      console.log('esle statement');
+      console.log(int);
+      var currentCount = int;
+      currentCount++;
+      console.log(currentCount);
+      writeCounter(currentCount, setIDCallback);
+    }
+  });
+  // console.log('Current Count:' + currentCount + ' after readCounter');
+  // // increment count
+  // currentCount++;
+  // console.log('After increment: ' + currentCount);
+  // // use writeCounter with incremented count, callback returns counterstring to use as id
+  // writeCounter(currentCount, (err, countString) => {
+  //   if (err) {
+  //     console.log(err);
+  //   } else {
+  //     return countString;
+  //   }
+  // });
 };
 
-
+getNextUniqueId((err, id) => {
+  if (err) {
+    console.log(error);
+  } else {
+    return id;
+  }
+});
 
 // Configuration -- DO NOT MODIFY //////////////////////////////////////////////
 
