@@ -4,10 +4,9 @@ const _ = require('underscore');
 const counter = require('./counter');
 
 var items = {};
-
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
-exports.create = (text, callback) => {
+exports.create = (text, createCallback) => {
   counter.getNextUniqueId((err, id) => {
     var filePath = path.join(exports.dataDir, `${id}.txt`);
 
@@ -15,27 +14,46 @@ exports.create = (text, callback) => {
       if (err) {
         throw ('error writing TODO file');
       } else {
-        callback(null, {id, text});
+        createCallback(null, {id, text});
       }
 
     });
   });
 };
 
-exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+exports.readAll = (readAllCallback) => {
+  fs.readdir(exports.dataDir, 'utf8', (err, dirList) => {
+    if (err) {
+      console.log(err);
+    } else {
+      mappedDirList = dirList.map((file) => {
+        var fileObject = {id: file.slice(0, -4), text: file.slice(0, -4)};
+        return fileObject;
+      });
+      readAllCallback(null, mappedDirList);
+    }
   });
-  callback(null, data);
 };
 
+
+
 exports.readOne = (id, callback) => {
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
+  var toDoPath = path.join(exports.dataDir, `${id}.txt`);
+  fs.readFile(toDoPath, (err, fileData) => {
+    if (err) {
+      /////////// CAN'T THROW STOPS SERVER, pass error to callback instead
+      callback('No Such ID exists');
+    } else {
+      // var fileObject = {id: id, text: fileData};
+      callback(null, {id: id, text: fileData.toString()});
+    }
+  });
+  // var text = items[id];
+  // if (!text) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   callback(null, { id, text });
+  // }
 };
 
 exports.update = (id, text, callback) => {
