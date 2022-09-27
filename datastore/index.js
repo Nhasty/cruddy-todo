@@ -37,33 +37,33 @@ exports.readAll = (readAllCallback) => {
 
 
 
-exports.readOne = (id, callback) => {
+exports.readOne = (id, readOneCallback) => {
   var toDoPath = path.join(exports.dataDir, `${id}.txt`);
   fs.readFile(toDoPath, (err, fileData) => {
     if (err) {
       /////////// CAN'T THROW STOPS SERVER, pass error to callback instead
-      callback('No Such ID exists');
+      readOneCallback('No Such ID exists');
     } else {
-      // var fileObject = {id: id, text: fileData};
-      callback(null, {id: id, text: fileData.toString()});
+      ////////// fileData is a buffer object, must be converted to put in object
+      readOneCallback(null, {id, text: fileData.toString()});
     }
   });
-  // var text = items[id];
-  // if (!text) {
-  //   callback(new Error(`No item with id: ${id}`));
-  // } else {
-  //   callback(null, { id, text });
-  // }
 };
 
-exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text });
-  }
+exports.update = (id, text, updateCallback) => {
+  var toDoPath = path.join(exports.dataDir, `${id}.txt`);
+  // fs.truncate(toDoPath, (err) => {
+  //   if (err) {
+  //     console.log(err);
+  //   } else {
+  const flag = fs.constants.O_WRONLY | fs.constants.O_TRUNC;
+  fs.writeFile(toDoPath, text, {flag}, (err) => {
+    if (err) {
+      updateCallback(err);
+    } else {
+      updateCallback(null, text);
+    }
+  });
 };
 
 exports.delete = (id, callback) => {

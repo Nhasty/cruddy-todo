@@ -18,10 +18,8 @@ const zeroPaddedNumber = (num) => {
 const readCounter = (callback) => {
   fs.readFile(exports.counterFile, (err, fileData) => {
     if (err) {
-      console.log('err see line 21 counter.js');
       callback(null, 0);
     } else {
-      console.log(fileData);
       callback(null, Number(fileData));
     }
   });
@@ -47,13 +45,9 @@ exports.getNextUniqueId = (setIDCallBack) => {
     console.log(err + '    ' + int);
     if (err) {
       setIDCallBack(err);
-      console.log(err);
     } else {
-      console.log('esle statement');
-      console.log(int);
       var currentCount = int;
       currentCount++;
-      console.log(currentCount);
       writeCounter(currentCount, setIDCallBack);
     }
   });
