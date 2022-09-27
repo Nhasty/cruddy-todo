@@ -42,7 +42,6 @@ exports.getNextUniqueId = (setIDCallBack) => {
   // counter = counter + 1;
   // read count use efcb to return a Number(filedata)
   readCounter((err, int) => {
-    console.log(err + '    ' + int);
     if (err) {
       setIDCallBack(err);
     } else {
