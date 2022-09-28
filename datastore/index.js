@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
-
+const Promise = require('bluebird');
+const readFilePromise = Promise.promisify(fs.readFile);
 var items = {};
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
@@ -24,16 +25,24 @@ exports.create = (text, createCallback) => {
 exports.readAll = (readAllCallback) => {
   fs.readdir(exports.dataDir, 'utf8', (err, dirList) => {
     if (err) {
-      console.log(err);
+      throw ('error reading data folder');
     } else {
       mappedDirList = dirList.map((file) => {
-        var fileObject = {id: file.slice(0, -4), text: file.slice(0, -4)};
-        return fileObject;
+        var id = path.basename(file, '.txt');
+        var toDoPath = path.join(exports.dataDir, file);
+        return readFilePromise(toDoPath).then((fileData) => {
+          return {
+            id: id,
+            text: fileData.toString()
+          };
+        });
       });
-      readAllCallback(null, mappedDirList);
+      Promise.all(mappedDirList)
+        .then(items => readAllCallback(null, items));
     }
   });
 };
+
 
 
 
@@ -52,10 +61,6 @@ exports.readOne = (id, readOneCallback) => {
 
 exports.update = (id, text, updateCallback) => {
   var toDoPath = path.join(exports.dataDir, `${id}.txt`);
-  // fs.truncate(toDoPath, (err) => {
-  //   if (err) {
-  //     console.log(err);
-  //   } else {
   const flag = fs.constants.O_WRONLY | fs.constants.O_TRUNC;
   fs.writeFile(toDoPath, text, {flag}, (err) => {
     if (err) {
@@ -76,14 +81,6 @@ exports.delete = (id, callback) => {
       callback();
     }
   });
-  // var item = items[id];
-  // delete items[id];
-  // if (!item) {
-  //   // report an error if item not found
-  //   callback(new Error(`No item with id: ${id}`));
-  // } else {
-  //   callback();
-  // }
 };
 
 // Config+Initialization code -- DO NOT MODIFY /////////////////////////////////

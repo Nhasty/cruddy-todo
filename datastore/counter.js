@@ -47,7 +47,9 @@ exports.getNextUniqueId = (setIDCallBack) => {
     } else {
       var currentCount = int;
       currentCount++;
-      writeCounter(currentCount, setIDCallBack);
+      writeCounter(currentCount, (err, uniqueID) => {
+        setIDCallBack(err, uniqueID);
+      });
     }
   });
   // console.log('Current Count:' + currentCount + ' after readCounter');
